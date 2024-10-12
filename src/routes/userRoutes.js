@@ -42,7 +42,7 @@ router.post("/register", async (req, res, next) => {
     const isUser = await UserData.findOne({ userName: userName });
 
     if (isUser) {
-      return res.json({
+      return res.status(400).json({
         error: true,
         message: "Username already exist",
       });
@@ -51,7 +51,7 @@ router.post("/register", async (req, res, next) => {
     const isEmail = await UserData.findOne({ email: email });
 
     if (isEmail) {
-      return res.json({
+      return res.status(400).json({
         error: true,
         message: "Email already exist",
       });
@@ -76,13 +76,13 @@ router.post("/register", async (req, res, next) => {
       password: hashedPassword,
     });
     
-    return res.json({
+    return res.status(201).json({
       data: newUser,
       accessToken: token,
       message: "Registration Successful",
     });
   } catch (error) {
-    next(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -101,14 +101,14 @@ router.post("/login", async (req, res, next) => {
 
     const emailCheck = await UserData.findOne({ email: email });
     if (!emailCheck) {
-      return res.status(400).json({ error: true, message: "Email Invalid" });
+      return res.status(401).json({ error: true, message: "Email Invalid" });
     }
 
     // console.log(emailCheck)
 
     const isMatch = await comparePassword(password, emailCheck.password);
     if (!isMatch) {
-      return res.status(400).json({ error: true, message: "Invalid Password" });
+      return res.status(401).json({ error: true, message: "Invalid Password" });
     }
 
     // Generate token
@@ -116,33 +116,36 @@ router.post("/login", async (req, res, next) => {
     // delete emailCheck.password;
 
     res
-      .status(200)
+      .status(201)
       .json({
-        message: "Login success",
+        message: "Login successful",
         data: emailCheck,
         accessToken: token,
       });
   } catch (error) {
-    next(error)
-    // res.status(401).json({ error: 'Wrong email or password' });
+   
+    return res.status(500).json({ error: 'Internal Server Error' });
+    
   }
 });
 
 
 // API - 3 Get user by ID
-router.get("/get-user", authenticateMiddleware, async (req, res) => {
+router.get("/get-user", authenticateMiddleware, async (req, res, next) => {
     try {
       const user = req.user;
+      
       if (!user) {
-        return res.sendStatus(401);
+        return res.status(401).json({user: user, message: "Authorization token not Found",});
       }
-      return res.json({
+
+      return res.status(200).json({
         user: user,
         message: "User Found",
       });
-  
+     
     } catch (error) {
-      next(error);
+      return res.status(500).json({ error: 'Internal Server Error ' });
     }
   });
 

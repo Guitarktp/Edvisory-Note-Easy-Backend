@@ -48,7 +48,7 @@ router.post("/add-note", authenticateMiddleware, async (req, res) => {
     });
 
     await newNote.save();
-    return res.json({
+    return res.status(201).json({
       data: newNote,
       message: "Note added successful",
     });
@@ -64,7 +64,7 @@ router.post("/add-note", authenticateMiddleware, async (req, res) => {
 // API 2 - Edit note
 router.put("/edit-note/:noteId", authenticateMiddleware, async (req, res) => {
     const noteId = req.params.noteId;
-    const { title, content, author, tags, category, isPinned } = req.body;
+    const { title, content, author, tags, category } = req.body;
     const user = req.user;
   
     if (!title && !content && !author && !category && !tags ) {
@@ -86,7 +86,6 @@ router.put("/edit-note/:noteId", authenticateMiddleware, async (req, res) => {
       if (author) noteInfo.author = author;
       if (category) noteInfo.category = category;
       if (tags) noteInfo.tags = tags;
-      if (isPinned) noteInfo.isPinned = isPinned;
   
       noteInfo.editHistory.push({
         oldTitle: noteInfo.title,
@@ -98,8 +97,7 @@ router.put("/edit-note/:noteId", authenticateMiddleware, async (req, res) => {
       });
   
       await noteInfo.save();
-      return res.json({
-        error: false,
+      return res.status(201).json({
         noteInfo,
         message: "Note updated successfully",
       });
@@ -122,7 +120,8 @@ router.get("/get-note-by-id/:noteId", authenticateMiddleware, async (req, res) =
         return res.status(404).json({ error: true, message: "Note not found" });
       }
       return res.status(200).json({
-        editHistory: noteInfo.editHistory
+        noteInfo: noteInfo,
+        message: "Note retrieved successfully"
       })
       
     } catch (error) {
@@ -132,19 +131,17 @@ router.get("/get-note-by-id/:noteId", authenticateMiddleware, async (req, res) =
       });
     }
   
-  
-  
-  
   })
   
   // API 4 - Get all note
   router.get("/get-all-notes", authenticateMiddleware, async (req, res) => {
     const user = req.user;
-    // use sort for pinned note on the top
     try {
       const allNotes = await noteData.find({ userId: user._id });
-      return res.json({
-          error: false,
+      if (!allNotes) {
+        return res.status(404).json({ error: true, message: "Note not found" });
+      }
+      return res.status(200).json({
           allNotes,
           message: "All notes retrieved successfully",
         });
