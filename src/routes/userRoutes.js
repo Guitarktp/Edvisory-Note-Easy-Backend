@@ -130,9 +130,20 @@ router.post("/login", async (req, res, next) => {
 
 
 // API - 3 Get user by ID
-
-
-
-
+router.get("/get-user", authenticateMiddleware, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.sendStatus(401);
+      }
+      return res.json({
+        user: user,
+        message: "User Found",
+      });
+  
+    } catch (error) {
+      next(error);
+    }
+  });
 
 export default router;
