@@ -4,7 +4,7 @@ import authenticateMiddleware from "../middleware/authenticateMiddleware.js";
 
 const router = express.Router();
 
-// API - Add note
+// API 1 - Add note
 
 router.post("/add-note", authenticateMiddleware, async (req, res) => {
   const { title, content, author, category, tags } = req.body;
@@ -61,7 +61,7 @@ router.post("/add-note", authenticateMiddleware, async (req, res) => {
 });
 
 
-// API - Edit note
+// API 2 - Edit note
 router.put("/edit-note/:noteId", authenticateMiddleware, async (req, res) => {
     const noteId = req.params.noteId;
     const { title, content, author, tags, category, isPinned } = req.body;
@@ -103,6 +103,51 @@ router.put("/edit-note/:noteId", authenticateMiddleware, async (req, res) => {
         noteInfo,
         message: "Note updated successfully",
       });
+    } catch (error) {
+      return res.status(500).json({
+        error: true,
+        message: "Internal Server Error",
+      });
+    }
+  });
+
+// API 3 - Get Note by ID
+router.get("/get-note-by-id/:noteId", authenticateMiddleware, async (req, res) => {
+
+    const noteId = req.params.noteId
+  
+    try {
+      const noteInfo = await noteData.findById({_id:noteId})
+      if (!noteInfo) {
+        return res.status(404).json({ error: true, message: "Note not found" });
+      }
+      return res.status(200).json({
+        editHistory: noteInfo.editHistory
+      })
+      
+    } catch (error) {
+      return res.status(500).json({
+        error: true,
+        message: "Internal Server Error",
+      });
+    }
+  
+  
+  
+  
+  })
+  
+  // API 4 - Get all note
+  router.get("/get-all-notes", authenticateMiddleware, async (req, res) => {
+    const user = req.user;
+    // use sort for pinned note on the top
+    try {
+      const allNotes = await noteData.find({ userId: user._id });
+      return res.json({
+          error: false,
+          allNotes,
+          message: "All notes retrieved successfully",
+        });
     } catch (error) {
       return res.status(500).json({
         error: true,

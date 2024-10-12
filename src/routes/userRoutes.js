@@ -1,6 +1,6 @@
 import express from "express";
 import UserData from "../models/user.js";
-import { sign, verify } from "../utils/token.js";
+import { sign } from "../utils/token.js";
 import { hashPassword, comparePassword } from "../utils/hash.js";
 import authenticateMiddleware from "../middleware/authenticateMiddleware.js";
 
@@ -145,5 +145,8 @@ router.get("/get-user", authenticateMiddleware, async (req, res) => {
       next(error);
     }
   });
+
+
+  
 
 export default router;
