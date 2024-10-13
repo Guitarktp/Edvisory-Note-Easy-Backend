@@ -38,7 +38,6 @@ router.post("/register", async (req, res, next) => {
         .json({ error: true, message: "Password not match" });
     }
 
-    // use mongoose model named User อาจจะต้องย้ายไป model
     const isUser = await UserData.findOne({ userName: userName });
 
     if (isUser) {
@@ -131,7 +130,7 @@ router.post("/login", async (req, res, next) => {
 
 
 // API - 3 Get user by ID
-router.get("/get-user", authenticateMiddleware, async (req, res, next) => {
+router.get("/get-user", authenticateMiddleware, async (req, res ) => {
     try {
       const user = req.user;
       
